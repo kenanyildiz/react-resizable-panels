@@ -159,8 +159,13 @@ export type GroupProps = HTMLAttributes<HTMLDivElement> & {
    *
    * ℹ️ For layout changes caused by pointer events, this method is not called until the pointer has been released.
    * This method is recommended when saving layouts to some storage api.
+   *
+   * The second argument `isUserInteraction` is `true` when the change was
+   * caused by the user releasing a pointer drag, and `false` for every other
+   * source (programmatic `setLayout`, constraint recompute, default-size
+   * change, initial mount). See #716.
    */
-  onLayoutChanged?: (layout: Layout) => void | undefined;
+  onLayoutChanged?: (layout: Layout, isUserInteraction: boolean) => void;
 
   /**
    * Minimum size of the resizable hit target area (either `Separator` or `Panel` edge)

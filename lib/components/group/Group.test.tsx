@@ -100,7 +100,11 @@ describe("Group", () => {
         groupRef: RefObject<GroupImperativeHandle | null>;
         panelRef: RefObject<PanelImperativeHandle | null>;
       }) => Promise<void>,
-      expectedLayout: Layout
+      expectedLayout: Layout,
+      // `true` when the callback simulates a pointer drag (see #716);
+      // `false` for keyboard / imperative API / mount which fall under the
+      // "library-driven" bucket of the new flag.
+      expectedIsUserInteraction: boolean
     ) {
       setElementBoundsFunction((element) => {
         switch (element.id) {
@@ -133,15 +137,21 @@ describe("Group", () => {
       );
 
       expect(onLayoutChanged).toHaveBeenCalledTimes(1);
-      expect(onLayoutChanged).toHaveBeenLastCalledWith({
-        left: 50,
-        right: 50
-      });
+      expect(onLayoutChanged).toHaveBeenLastCalledWith(
+        {
+          left: 50,
+          right: 50
+        },
+        false
+      );
 
       await callback({ container, groupRef, panelRef });
 
       expect(onLayoutChanged).toHaveBeenCalledTimes(2);
-      expect(onLayoutChanged).toHaveBeenLastCalledWith(expectedLayout);
+      expect(onLayoutChanged).toHaveBeenLastCalledWith(
+        expectedLayout,
+        expectedIsUserInteraction
+      );
 
       rerender(
         <Group groupRef={groupRef} onLayoutChanged={onLayoutChanged}>
@@ -150,7 +160,7 @@ describe("Group", () => {
       );
 
       expect(onLayoutChanged).toHaveBeenCalledTimes(3);
-      expect(onLayoutChanged).toHaveBeenLastCalledWith({ right: 100 });
+      expect(onLayoutChanged).toHaveBeenLastCalledWith({ right: 100 }, false);
 
       rerender(
         <Group groupRef={groupRef} onLayoutChanged={onLayoutChanged}>
@@ -161,7 +171,7 @@ describe("Group", () => {
       );
 
       expect(onLayoutChanged).toHaveBeenCalledTimes(4);
-      expect(onLayoutChanged).toHaveBeenLastCalledWith(expectedLayout);
+      expect(onLayoutChanged).toHaveBeenLastCalledWith(expectedLayout, false);
     }
 
     test("should update when resized via pointer", async () => {
@@ -172,7 +182,8 @@ describe("Group", () => {
         {
           left: 60,
           right: 40
-        }
+        },
+        true
       );
     });
 
@@ -185,7 +196,8 @@ describe("Group", () => {
         {
           left: 55,
           right: 45
-        }
+        },
+        false
       );
     });
 
@@ -200,7 +212,8 @@ describe("Group", () => {
         {
           left: 75,
           right: 25
-        }
+        },
+        false
       );
     });
 
@@ -212,7 +225,8 @@ describe("Group", () => {
         {
           left: 35,
           right: 65
-        }
+        },
+        false
       );
     });
   });
@@ -264,10 +278,13 @@ describe("Group", () => {
       );
 
       expect(onLayoutChanged).toBeCalledTimes(1);
-      expect(onLayoutChanged).toHaveBeenLastCalledWith({
-        left: 25,
-        right: 75
-      });
+      expect(onLayoutChanged).toHaveBeenLastCalledWith(
+        {
+          left: 25,
+          right: 75
+        },
+        false
+      );
       expect(groupRef.current?.getLayout()).toEqual({
         left: 25,
         right: 75
@@ -310,10 +327,13 @@ describe("Group", () => {
       );
 
       expect(onLayoutChanged).toBeCalledTimes(1);
-      expect(onLayoutChanged).toHaveBeenLastCalledWith({
-        left: 25,
-        right: 75
-      });
+      expect(onLayoutChanged).toHaveBeenLastCalledWith(
+        {
+          left: 25,
+          right: 75
+        },
+        false
+      );
       expect(groupRef.current?.getLayout()).toEqual({
         left: 25,
         right: 75
@@ -328,10 +348,13 @@ describe("Group", () => {
       });
 
       expect(onLayoutChanged).toBeCalledTimes(2);
-      expect(onLayoutChanged).toHaveBeenLastCalledWith({
-        left: 20,
-        right: 80
-      });
+      expect(onLayoutChanged).toHaveBeenLastCalledWith(
+        {
+          left: 20,
+          right: 80
+        },
+        false
+      );
       expect(groupRef.current?.getLayout()).toEqual({
         left: 20,
         right: 80
@@ -429,19 +452,25 @@ describe("Group", () => {
         );
 
         expect(onLayoutChanged).toHaveBeenCalledTimes(1);
-        expect(onLayoutChanged).toHaveBeenCalledWith({
-          left: 60,
-          right: 40
-        });
+        expect(onLayoutChanged).toHaveBeenCalledWith(
+          {
+            left: 60,
+            right: 40
+          },
+          false
+        );
 
         // Simulate a drag from the draggable element to the target area
         await moveSeparator(10);
 
         expect(onLayoutChanged).toHaveBeenCalledTimes(2);
-        expect(onLayoutChanged).toHaveBeenCalledWith({
-          left: 70,
-          right: 30
-        });
+        expect(onLayoutChanged).toHaveBeenCalledWith(
+          {
+            left: 70,
+            right: 30
+          },
+          true
+        );
       });
 
       test("three panel vertical group", async () => {
@@ -489,21 +518,27 @@ describe("Group", () => {
         );
 
         expect(onLayoutChanged).toHaveBeenCalledTimes(1);
-        expect(onLayoutChanged).toHaveBeenCalledWith({
-          bottom: 50,
-          middle: 30,
-          top: 20
-        });
+        expect(onLayoutChanged).toHaveBeenCalledWith(
+          {
+            bottom: 50,
+            middle: 30,
+            top: 20
+          },
+          false
+        );
 
         // Simulate a drag from the draggable element to the target area
         await moveSeparator(15, "top-separator");
 
         expect(onLayoutChanged).toHaveBeenCalledTimes(2);
-        expect(onLayoutChanged).toHaveBeenCalledWith({
-          bottom: 50,
-          middle: 20,
-          top: 30
-        });
+        expect(onLayoutChanged).toHaveBeenCalledWith(
+          {
+            bottom: 50,
+            middle: 20,
+            top: 30
+          },
+          true
+        );
       });
     });
 
@@ -706,10 +741,13 @@ describe("Group", () => {
       });
 
       expect(onLayoutChanged).toHaveBeenCalledTimes(1);
-      expect(onLayoutChanged).toHaveBeenCalledWith({
-        a: 50,
-        b: 50
-      });
+      expect(onLayoutChanged).toHaveBeenCalledWith(
+        {
+          a: 50,
+          b: 50
+        },
+        false
+      );
 
       rerender(
         <Group
@@ -746,10 +784,13 @@ describe("Group", () => {
       });
 
       expect(onLayoutChanged).toHaveBeenCalledTimes(1);
-      expect(onLayoutChanged).toHaveBeenCalledWith({
-        a: 40,
-        b: 60
-      });
+      expect(onLayoutChanged).toHaveBeenCalledWith(
+        {
+          a: 40,
+          b: 60
+        },
+        false
+      );
 
       rerender(
         <Group
@@ -787,10 +828,13 @@ describe("Group", () => {
       });
 
       expect(onLayoutChanged).toHaveBeenCalledTimes(1);
-      expect(onLayoutChanged).toHaveBeenCalledWith({
-        a: 50,
-        b: 50
-      });
+      expect(onLayoutChanged).toHaveBeenCalledWith(
+        {
+          a: 50,
+          b: 50
+        },
+        false
+      );
 
       rerender(
         <Group
@@ -813,12 +857,15 @@ describe("Group", () => {
       });
 
       expect(onLayoutChanged).toHaveBeenCalledTimes(2);
-      expect(onLayoutChanged).toHaveBeenCalledWith({
-        a: 25,
-        b: 25,
-        c: 25,
-        d: 25
-      });
+      expect(onLayoutChanged).toHaveBeenCalledWith(
+        {
+          a: 25,
+          b: 25,
+          c: 25,
+          d: 25
+        },
+        false
+      );
     });
 
     test("should be called once per layout change", async () => {
@@ -857,10 +904,13 @@ describe("Group", () => {
       });
 
       expect(onLayoutChanged).toHaveBeenCalledTimes(1);
-      expect(onLayoutChanged).toHaveBeenCalledWith({
-        a: 50,
-        c: 50
-      });
+      expect(onLayoutChanged).toHaveBeenCalledWith(
+        {
+          a: 50,
+          c: 50
+        },
+        false
+      );
 
       onLayoutChange.mockReset();
       onLayoutChanged.mockReset();
@@ -875,10 +925,13 @@ describe("Group", () => {
       });
 
       expect(onLayoutChanged).toHaveBeenCalledTimes(1);
-      expect(onLayoutChanged).toHaveBeenCalledWith({
-        a: 75,
-        c: 25
-      });
+      expect(onLayoutChanged).toHaveBeenCalledWith(
+        {
+          a: 75,
+          c: 25
+        },
+        true
+      );
 
       onLayoutChange.mockReset();
       onLayoutChanged.mockReset();
@@ -919,10 +972,13 @@ describe("Group", () => {
       });
 
       expect(onLayoutChanged).toHaveBeenCalledTimes(1);
-      expect(onLayoutChanged).toHaveBeenCalledWith({
-        a: 25,
-        b: 75
-      });
+      expect(onLayoutChanged).toHaveBeenCalledWith(
+        {
+          a: 25,
+          b: 75
+        },
+        false
+      );
 
       rerender(
         <Group

@@ -17,6 +17,12 @@ let map: MountedGroups = new Map();
 
 type GroupChangeEvent = {
   group: RegisteredGroup;
+  // `true` only when the change was emitted by the pointer-up handler at the
+  // end of a real user drag (see lib/global/event-handlers/onDocumentPointerUp.ts
+  // and the missed-pointerup fallback in onDocumentPointerMove.ts). `false` for
+  // every other source (constraint recompute, default-size change, programmatic
+  // setLayout, etc.).
+  isUserInteraction: boolean;
   next: State;
   prev: State | undefined;
 };
@@ -87,7 +93,11 @@ export function subscribeToMountedGroup(
   });
 }
 
-export function updateMountedGroup(group: RegisteredGroup, next: State) {
+export function updateMountedGroup(
+  group: RegisteredGroup,
+  next: State,
+  meta?: { isUserInteraction?: boolean }
+) {
   const prev = map.get(group);
 
   map = new Map(map);
@@ -95,6 +105,7 @@ export function updateMountedGroup(group: RegisteredGroup, next: State) {
 
   eventEmitter.emit("groupChange", {
     group,
+    isUserInteraction: meta?.isUserInteraction === true,
     prev,
     next
   });
