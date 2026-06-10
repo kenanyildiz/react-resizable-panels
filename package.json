@@ -37,7 +37,6 @@
     "e2e:test:main": "pnpm -C integrations/tests run test --project=chromium",
     "e2e:test:popup": "pnpm -C integrations/tests run test --project=chromium:popup",
     "lint": "eslint .",
-    "prepare": "cross-env TARGET=lib vite build",
     "prerelease": "rimraf dist && pnpm run build:lib",
     "prettier": "prettier --write \"**/*.{css,html,js,json,jsx,ts,tsx}\"",
     "prettier:ci": "prettier --check \"**/*.{css,html,js,json,jsx,ts,tsx}\"",
