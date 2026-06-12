@@ -7,6 +7,9 @@ export const routes = {
   "/examples/min-max-sizes": lazy(
     () => import("./routes/SizeConstraintsRoute")
   ),
+  "/examples/is-user-interaction": lazy(
+    () => import("./routes/IsUserInteractionRoute")
+  ),
   "/examples/collapsible-panels": lazy(
     () => import("./routes/CollapsiblePanelsRoute")
   ),

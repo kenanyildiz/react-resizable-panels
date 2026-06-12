@@ -28,6 +28,9 @@ export default function App() {
           <NavSection label="Examples">
             <NavLink path="/examples/the-basics">The basics</NavLink>
             <NavLink path="/examples/min-max-sizes">Min/max sizes</NavLink>
+            <NavLink path="/examples/is-user-interaction">
+              isUserInteraction flag
+            </NavLink>
             <NavLink path="/examples/collapsible-panels">
               Collapsible panels
             </NavLink>
